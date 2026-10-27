@@ -444,7 +444,11 @@
                     for (let folder of sub.folders) {
                         if (folder.type === 'youtube' || folder.type === 'telegram') continue;
                         const res = await fetch(`${API_URL}?folderId=${folder.id}`);
-                        const files = await res.json();
+                        let files = await res.json();
+                        
+                        // ترتيب الملفات بشكل طبيعي للبحث
+                        files.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: 'base' }));
+
                         files.forEach(f => {
                             globalFilesCache.push({
                                 title: f.title, link: f.link,
@@ -594,13 +598,16 @@
 
             try {
                 const res = await fetch(`${API_URL}?folderId=${folderId}`);
-                const files = await res.json();
+                let files = await res.json();
                 loader.classList.add('hidden');
 
                 if (files.length === 0) {
                     container.innerHTML = '<p class="text-gray-500 text-center py-4">No files available in this section.</p>';
                     return;
                 }
+
+                // الترتيب الطبيعي للملفات والريكوردات بناءً على أسمائها
+                files.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: 'base' }));
 
                 const isRecodesFolder = folderTitle.toLowerCase().includes('recode');
 
