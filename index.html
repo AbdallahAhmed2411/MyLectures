@@ -22,33 +22,73 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; }
+        body { font-family: 'Cairo', sans-serif; overflow-x: hidden; }
         
-        /* Custom Themes */
-        :root { --primary-color: #2563eb; --primary-hover: #1d4ed8; }
-        [data-theme="purple"] { --primary-color: #7c3aed; --primary-hover: #6d28d9; }
-        [data-theme="emerald"] { --primary-color: #059669; --primary-hover: #047857; }
-        [data-theme="amber"] { --primary-color: #d97706; --primary-hover: #b45309; }
-        [data-theme="rose"] { --primary-color: #e11d48; --primary-hover: #be123c; }
+        /* Custom Themes with Glow Effects */
+        :root { 
+            --primary-color: #2563eb; 
+            --primary-hover: #1d4ed8; 
+            --primary-glow: rgba(37, 99, 235, 0.12);
+        }
+        [data-theme="purple"] { 
+            --primary-color: #7c3aed; 
+            --primary-hover: #6d28d9; 
+            --primary-glow: rgba(124, 58, 237, 0.12);
+        }
+        [data-theme="emerald"] { 
+            --primary-color: #059669; 
+            --primary-hover: #047857; 
+            --primary-glow: rgba(5, 150, 105, 0.12);
+        }
+        [data-theme="amber"] { 
+            --primary-color: #d97706; 
+            --primary-hover: #b45309; 
+            --primary-glow: rgba(217, 119, 6, 0.12);
+        }
+        [data-theme="rose"] { 
+            --primary-color: #e11d48; 
+            --primary-hover: #be123c; 
+            --primary-glow: rgba(225, 29, 72, 0.12);
+        }
 
         .dynamic-bg { background-color: var(--primary-color) !important; }
         .dynamic-bg:hover { background-color: var(--primary-hover) !important; }
         .dynamic-text { color: var(--primary-color) !important; }
         .dynamic-border { border-color: var(--primary-color) !important; }
 
+        /* 1. تأثير الفولدرات العادية (الإطار وخلفية زجاجية مضيئة بنفس لون الثيم) */
+        .theme-hover-card {
+            transition: all 0.2s ease-in-out;
+        }
         .theme-hover-card:hover {
             border-color: var(--primary-color) !important;
-            background-color: rgba(37, 99, 235, 0.04);
-        }
-        html.dark .theme-hover-card:hover {
-            background-color: rgba(255, 255, 255, 0.03);
-            border-color: var(--primary-color) !important;
+            background-color: var(--primary-glow) !important;
+            transform: translateY(-2px);
         }
 
+        /* 2. تأثير الريكوردز (ثابت بلون بنفسجي) */
+        .recode-hover-card {
+            transition: all 0.2s ease-in-out;
+        }
         .recode-hover-card:hover {
             border-color: #a855f7 !important;
-            background-color: rgba(168, 85, 247, 0.05);
+            background-color: rgba(168, 85, 247, 0.12) !important;
+            transform: translateY(-2px);
         }
+
+        /* 3. تأثير الفيديوهات (ثابت بلون روز) */
+        .video-hover-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .video-hover-card:hover {
+            border-color: #e11d48 !important;
+            background-color: rgba(225, 29, 72, 0.12) !important;
+            transform: translateY(-2px);
+        }
+        
+        .rose-fixed-bg { background-color: #e11d48 !important; }
+        .rose-fixed-bg:hover { background-color: #be123c !important; }
+        .rose-fixed-text { color: #e11d48 !important; }
     </style>
 </head>
 <body class="min-h-screen p-3 sm:p-6 bg-gray-100 dark:bg-navy-900 text-gray-800 dark:text-white transition-colors duration-300">
@@ -147,10 +187,10 @@
             <button id="back-to-folders" class="mb-4 bg-gray-300 dark:bg-navy-700 hover:bg-gray-400 px-4 py-2 rounded-lg transition text-sm">
                 <i class="fas fa-arrow-left mr-2"></i> Back to Sections
             </button>
-            <h2 id="current-folder-title" class="text-lg font-bold dynamic-text mb-4 border-b border-gray-300 dark:border-navy-700 pb-2"></h2>
+            <h2 id="current-folder-title" class="text-lg font-bold rose-fixed-text mb-4 border-b border-gray-300 dark:border-navy-700 pb-2"></h2>
             
             <div id="files-loader" class="hidden text-center py-10">
-                <i class="fas fa-circle-notch fa-spin text-3xl dynamic-text mb-2"></i>
+                <i class="fas fa-circle-notch fa-spin text-3xl rose-fixed-text mb-2"></i>
                 <p class="text-gray-500 text-sm">Loading files...</p>
             </div>
             <div id="files-container" class="space-y-3"></div>
@@ -244,7 +284,7 @@
                 ]
             },
             {
-                id: 4, title: 'مراجعة النظم الالكترونية', icon: 'fa-search-dollar',
+                id: 4, title: 'Electronic Systems Audit', icon: 'fa-search-dollar',
                 folders: [
                     { title: 'Lectures', type: 'drive', id: '1ijF7U7Sz9u0w0W9GYMZPOGDGqE-WtZPm' },
                     { title: 'Questions', type: 'drive', id: '1b4D0STL1wR-tit9IOib-Jh-HljP_AUNN' },
@@ -253,7 +293,7 @@
                 ]
             },
             {
-                id: 5, title: 'إدارة الاستراتيجية', icon: 'fa-lightbulb',
+                id: 5, title: 'Strategic Management', icon: 'fa-lightbulb',
                 folders: [
                     { title: 'Lectures', type: 'drive', id: '133ZI9NxZ07km0-oL3FyxG_k3ysrkkBgS' },
                     { title: 'Questions', type: 'drive', id: '1mP7M1WVFIeait0gB1C09Bqc53YzZfTLy' },
@@ -262,7 +302,7 @@
                 ]
             },
             {
-                id: 6, title: 'اللياقة البدنية', icon: 'fa-dumbbell',
+                id: 6, title: 'Physical Fitness', icon: 'fa-dumbbell',
                 folders: [
                     { title: 'Lectures', type: 'drive', id: '1-iozVC96T-Kx1USZZ4gb4C3rGQpmdNr9' },
                     { title: 'Questions', type: 'drive', id: '1M0hA9qLprbYJj2QlmnaIcQwTJ8GyVOni' },
@@ -280,7 +320,7 @@
                 ]
             },
             {
-                id: 8, title: 'Strategic Management', icon: 'fa-chess',
+                id: 8, title: 'Strategic Management (2)', icon: 'fa-chess',
                 folders: [
                     { title: 'Lectures', type: 'drive', id: '1MLRrxh5ddxq7y9WxvMR-L_guhakAnEb8' },
                     { title: 'Questions', type: 'drive', id: '1vogr60Dvf2a7GUk4VEggZ09XxdQYuFad' },
@@ -299,7 +339,6 @@
         renderSubjects();
         initCache();
 
-        // إعادة التوجيه للرئيسية عند عمل Refresh (إلغاء الـ Hash القديم عند الفتح الأول)
         if (window.location.hash) {
             window.location.hash = '#home';
         }
@@ -426,19 +465,19 @@
             grid.innerHTML = '';
             subjectsData.forEach(sub => {
                 const card = document.createElement('div');
-                card.className = 'bg-white dark:bg-navy-800 p-5 rounded-xl cursor-pointer theme-hover-card border border-gray-300 dark:border-navy-700 transition transform hover:-translate-y-1 shadow flex items-center justify-between';
+                card.className = 'bg-white dark:bg-navy-800 p-4 sm:p-5 rounded-xl cursor-pointer theme-hover-card border border-gray-300 dark:border-navy-700 shadow flex items-center justify-between';
                 card.onclick = () => { window.location.hash = `#subject=${sub.id}`; };
                 card.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <div class="bg-blue-100 dark:bg-blue-900/50 p-3.5 rounded-lg dynamic-text">
+                    <div class="flex items-center gap-3 sm:gap-4 overflow-hidden">
+                        <div class="bg-blue-100 dark:bg-blue-900/50 p-3 sm:p-3.5 rounded-lg dynamic-text flex-shrink-0">
                             <i class="fas ${sub.icon} text-xl"></i>
                         </div>
-                        <div>
-                            <h3 class="text-lg font-bold">${sub.title}</h3>
+                        <div class="overflow-hidden">
+                            <h3 class="text-base sm:text-lg font-bold truncate">${sub.title}</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-xs">${sub.folders.length} sections</p>
                         </div>
                     </div>
-                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+                    <i class="fas fa-chevron-right text-gray-400 text-sm flex-shrink-0 ml-2"></i>
                 `;
                 grid.appendChild(card);
             });
@@ -473,29 +512,30 @@
             sub.folders.forEach(folder => {
                 const card = document.createElement('div');
                 const isRec = folder.title.toLowerCase().includes('recode');
+                const isVideo = folder.type === 'youtube' || folder.title.toLowerCase().includes('video');
                 
-                if (folder.type === 'youtube') {
+                if (isVideo) {
                     card.onclick = () => { window.location.hash = `#folder=${sub.id}&${encodeURIComponent(folder.title)}`; };
-                    card.className = 'bg-white dark:bg-navy-800 p-4 rounded-xl cursor-pointer transition flex justify-between items-center shadow border border-gray-300 dark:border-navy-700 hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-900/20 dark:hover:border-red-700';
+                    card.className = 'bg-white dark:bg-navy-800 p-4 rounded-xl cursor-pointer video-hover-card border border-gray-300 dark:border-navy-700 shadow flex justify-between items-center';
                 } else if (folder.type === 'youtube-playlist') {
                     card.onclick = () => {
                         window.open(`https://www.youtube.com/playlist?list=${folder.playlistId}`, '_blank');
                     };
-                    card.className = 'bg-white dark:bg-navy-800 p-4 rounded-xl cursor-pointer transition flex justify-between items-center shadow border border-gray-300 dark:border-navy-700 hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-900/20 dark:hover:border-red-700';
+                    card.className = 'bg-white dark:bg-navy-800 p-4 rounded-xl cursor-pointer video-hover-card border border-gray-300 dark:border-navy-700 shadow flex justify-between items-center';
                 } else if (isRec) {
                     card.onclick = () => { window.location.hash = `#folder=${sub.id}&${encodeURIComponent(folder.title)}`; };
-                    card.className = 'bg-white dark:bg-navy-800 p-4 rounded-xl cursor-pointer recode-hover-card border border-gray-300 dark:border-navy-700 transition flex justify-between items-center shadow';
+                    card.className = 'bg-white dark:bg-navy-800 p-4 rounded-xl cursor-pointer recode-hover-card border border-gray-300 dark:border-navy-700 shadow flex justify-between items-center';
                 } else {
                     card.onclick = () => { window.location.hash = `#folder=${sub.id}&${encodeURIComponent(folder.title)}`; };
-                    card.className = 'bg-white dark:bg-navy-800 p-4 rounded-xl cursor-pointer theme-hover-card border border-gray-300 dark:border-navy-700 transition flex justify-between items-center shadow';
+                    card.className = 'bg-white dark:bg-navy-800 p-4 rounded-xl cursor-pointer theme-hover-card border border-gray-300 dark:border-navy-700 shadow flex justify-between items-center';
                 }
 
                 card.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <i class="fas ${isRec ? 'fa-microphone-alt text-purple-500' : (folder.type === 'youtube' ? 'fa-video text-red-500' : 'fa-folder dynamic-text')} text-xl"></i>
-                        <span class="font-bold text-sm sm:text-base">${folder.title}</span>
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <i class="fas ${isRec ? 'fa-microphone-alt text-purple-500' : (isVideo ? 'fa-video rose-fixed-text' : 'fa-folder dynamic-text')} text-xl flex-shrink-0"></i>
+                        <span class="font-bold text-sm sm:text-base truncate">${folder.title}</span>
                     </div>
-                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+                    <i class="fas fa-chevron-right text-gray-400 text-sm flex-shrink-0 ml-2"></i>
                 `;
                 grid.appendChild(card);
             });
@@ -522,14 +562,14 @@
                 const isFav = favorites.some(f => f.link === link);
 
                 const card = document.createElement('div');
-                card.className = 'bg-white dark:bg-navy-800 p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex justify-between items-center gap-3 shadow transition hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-900/20 dark:hover:border-red-700';
+                card.className = 'bg-white dark:bg-navy-800 p-3.5 sm:p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow video-hover-card';
                 card.innerHTML = `
-                    <div class="flex items-center gap-3 truncate text-left">
-                        <i class="fab fa-youtube text-red-500 text-2xl flex-shrink-0"></i>
-                        <span class="font-bold text-sm truncate">${item.title}</span>
+                    <div class="flex items-center gap-3 text-left overflow-hidden w-full sm:w-auto">
+                        <i class="fab fa-youtube rose-fixed-text text-2xl flex-shrink-0"></i>
+                        <span class="font-bold text-sm break-words">${item.title}</span>
                     </div>
-                    <div class="flex items-center gap-2 flex-shrink-0">
-                        <a href="${link}" target="_blank" class="bg-red-600 hover:bg-red-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
+                        <a href="${link}" target="_blank" class="rose-fixed-bg text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
                             <i class="fas fa-play"></i> Watch
                         </a>
                         <button onclick="toggleFavorite('${item.title}', '${link}', '${currentSubject.title}', '${folder.title}', this)" class="p-2 transition hover:scale-110">
@@ -569,14 +609,14 @@
                     const downloadUrl = getDirectDownloadUrl(file.link);
                     
                     const card = document.createElement('div');
-                    card.className = `bg-white dark:bg-navy-800 p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex justify-between items-center gap-3 shadow transition ${isRecodesFolder ? 'recode-hover-card' : 'theme-hover-card'}`;
+                    card.className = `bg-white dark:bg-navy-800 p-3.5 sm:p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow ${isRecodesFolder ? 'recode-hover-card' : 'theme-hover-card'}`;
                     
                     card.innerHTML = `
-                        <div class="flex items-center gap-3 truncate text-left">
+                        <div class="flex items-center gap-3 text-left overflow-hidden w-full sm:w-auto">
                             <i class="${isRecodesFolder ? 'fas fa-microphone text-purple-500' : 'fas fa-file-pdf text-red-500'} text-xl flex-shrink-0"></i>
-                            <span class="font-bold text-sm truncate">${file.title}</span>
+                            <span class="font-bold text-sm break-words">${file.title}</span>
                         </div>
-                        <div class="flex items-center gap-2 flex-shrink-0">
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
                             <button onclick="openViewer('${file.link}', '${file.title}')" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
                                 <i class="fas fa-eye"></i> View
                             </button>
@@ -628,16 +668,16 @@
                 const isRecItem = item.folderName.toLowerCase().includes('recode');
 
                 const card = document.createElement('div');
-                card.className = `bg-white dark:bg-navy-800 p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow transition ${isRecItem ? 'recode-hover-card' : 'theme-hover-card'}`;
+                card.className = `bg-white dark:bg-navy-800 p-3.5 sm:p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow ${isRecItem ? 'recode-hover-card' : 'theme-hover-card'}`;
                 card.innerHTML = `
-                    <div class="flex items-center gap-3 text-left">
+                    <div class="flex items-center gap-3 text-left overflow-hidden w-full sm:w-auto">
                         <i class="${isRecItem ? 'fas fa-microphone text-purple-500' : 'fas fa-file-pdf text-red-500'} text-xl flex-shrink-0"></i>
-                        <div>
-                            <h4 class="font-bold text-sm">${item.title}</h4>
+                        <div class="overflow-hidden">
+                            <h4 class="font-bold text-sm break-words">${item.title}</h4>
                             <p class="text-xs text-gray-400 mt-1"><span class="text-blue-400">${item.subjectName}</span> / <span class="text-yellow-500">${item.folderName}</span></p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 w-full sm:w-auto justify-start">
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
                         <button onclick="openViewer('${item.link}', '${item.title}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs">
                             <i class="fas fa-eye"></i> View
                         </button>
@@ -674,19 +714,19 @@
                 const isRecFav = item.folderName.toLowerCase().includes('recode');
 
                 const card = document.createElement('div');
-                card.className = `bg-white dark:bg-navy-800 p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow transition ${isRecFav ? 'recode-hover-card' : 'theme-hover-card'}`;
+                card.className = `bg-white dark:bg-navy-800 p-3.5 sm:p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow ${isRecFav ? 'recode-hover-card' : 'theme-hover-card'}`;
                 
                 card.innerHTML = `
-                    <div class="flex items-center gap-3 text-left">
-                        <i class="${isYouTube ? 'fab fa-youtube text-red-500' : (isRecFav ? 'fas fa-microphone text-purple-500' : 'fas fa-file-pdf text-red-500')} text-xl flex-shrink-0"></i>
-                        <div>
-                            <h4 class="font-bold text-sm">${item.title}</h4>
+                    <div class="flex items-center gap-3 text-left overflow-hidden w-full sm:w-auto">
+                        <i class="${isYouTube ? 'fab fa-youtube rose-fixed-text' : (isRecFav ? 'fas fa-microphone text-purple-500' : 'fas fa-file-pdf text-red-500')} text-xl flex-shrink-0"></i>
+                        <div class="overflow-hidden">
+                            <h4 class="font-bold text-sm break-words">${item.title}</h4>
                             <p class="text-xs text-gray-400 mt-1"><span class="text-blue-400">${item.subjectName}</span> / <span class="text-yellow-500">${item.folderName}</span></p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 w-full sm:w-auto justify-start">
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
                         ${isYouTube ? 
-                            `<a href="${item.link}" target="_blank" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i class="fas fa-play"></i> Watch</a>` :
+                            `<a href="${item.link}" target="_blank" class="rose-fixed-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i class="fas fa-play"></i> Watch</a>` :
                             `<button onclick="openViewer('${item.link}', '${item.title}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs"><i class="fas fa-eye"></i> View</button>
                              <a href="${downloadUrl}" class="dynamic-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i class="fas fa-download"></i> Download</a>`
                         }
