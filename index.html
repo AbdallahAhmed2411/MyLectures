@@ -56,7 +56,7 @@
         .dynamic-text { color: var(--primary-color) !important; }
         .dynamic-border { border-color: var(--primary-color) !important; }
 
-        /* 1. تأثير الفولدرات العادية */
+        /* تأثير الفولدرات العادية */
         .theme-hover-card {
             transition: all 0.2s ease-in-out;
         }
@@ -66,7 +66,7 @@
             transform: translateY(-2px);
         }
 
-        /* 2. تأثير الريكوردز */
+        /* تأثير الريكوردز */
         .recode-hover-card {
             transition: all 0.2s ease-in-out;
         }
@@ -76,7 +76,7 @@
             transform: translateY(-2px);
         }
 
-        /* 3. تأثير الفيديوهات */
+        /* تأثير الفيديوهات */
         .video-hover-card {
             transition: all 0.2s ease-in-out;
         }
@@ -89,6 +89,12 @@
         .rose-fixed-bg { background-color: #e11d48 !important; }
         .rose-fixed-bg:hover { background-color: #be123c !important; }
         .rose-fixed-text { color: #e11d48 !important; }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-down { animation: slideDown 0.4s ease-out forwards; }
     </style>
 </head>
 <body class="min-h-screen p-3 sm:p-6 bg-gray-100 dark:bg-navy-900 text-gray-800 dark:text-white transition-colors duration-300">
@@ -155,6 +161,28 @@
 
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto">
+        
+        <!-- Resume Learning Section (زرار Resume Now وعلامة X يتغيرون مع الثيم) -->
+        <div id="resume-section" class="hidden mb-6 px-2 animate-slide-down">
+            <div class="bg-white dark:bg-navy-800 rounded-2xl p-5 shadow-lg relative border border-gray-200 dark:border-navy-700">
+                <!-- Dismiss Button (يتغير لونه مع الثيم) -->
+                <button onclick="dismissResume()" class="absolute top-3 right-3 text-gray-400 hover:text-white hover:bg-red-500 w-7 h-7 rounded-full flex items-center justify-center transition text-xs shadow-sm" title="Dismiss">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <div class="pr-6">
+                    <p class="text-xs font-bold dynamic-text mb-1"><i class="fas fa-history mr-1"></i> Resume Learning</p>
+                    <h3 id="resume-title" class="text-base sm:text-lg font-bold text-gray-800 dark:text-white"></h3>
+                    <p id="resume-subject" class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
+                </div>
+                <div class="mt-4">
+                    <button onclick="resumeLastOpened()" class="dynamic-bg text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition-all inline-flex items-center gap-2 hover:opacity-90">
+                        <i class="fas fa-play"></i> Resume Now
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Search Results -->
         <div id="search-results-section" class="space-y-3 hidden mb-6">
             <h3 class="text-base font-bold dynamic-text border-b border-gray-300 dark:border-navy-700 pb-2">Search Results:</h3>
@@ -187,7 +215,10 @@
             <button id="back-to-folders" class="mb-4 bg-gray-300 dark:bg-navy-700 hover:bg-gray-400 px-4 py-2 rounded-lg transition text-sm">
                 <i class="fas fa-arrow-left mr-2"></i> Back to Sections
             </button>
-            <h2 id="current-folder-title" class="text-lg font-bold dynamic-text mb-4 border-b border-gray-300 dark:border-navy-700 pb-2"></h2>
+            <div class="mb-4 border-b border-gray-300 dark:border-navy-700 pb-2">
+                <h2 id="current-folder-title" class="text-lg font-bold dynamic-text"></h2>
+                <p id="current-breadcrumb" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Browsing current section files</p>
+            </div>
             
             <!-- Progress Bar Section -->
             <div id="progress-container" class="bg-white dark:bg-navy-800 p-3.5 rounded-xl border border-gray-300 dark:border-navy-700 mb-4 shadow-sm">
@@ -388,6 +419,43 @@
             }
         }
 
+        // ==========================================
+        // Resume Learning Functions
+        // ==========================================
+        function saveLastOpened(title, link, subjectName, type) {
+            const lastOpened = { title, link, subjectName, type };
+            localStorage.setItem('lastOpenedFile', JSON.stringify(lastOpened));
+        }
+
+        function renderResumeCard() {
+            const lastOpened = JSON.parse(localStorage.getItem('lastOpenedFile'));
+            const resumeSec = document.getElementById('resume-section');
+            if (lastOpened) {
+                resumeSec.classList.remove('hidden');
+                document.getElementById('resume-title').innerText = lastOpened.title;
+                document.getElementById('resume-subject').innerText = lastOpened.subjectName;
+            } else {
+                resumeSec.classList.add('hidden');
+            }
+        }
+
+        function resumeLastOpened() {
+            const lastOpened = JSON.parse(localStorage.getItem('lastOpenedFile'));
+            if (lastOpened) {
+                if (lastOpened.type === 'video' || lastOpened.link.includes('youtube')) {
+                    window.open(lastOpened.link, '_blank');
+                } else {
+                    openViewer(lastOpened.link, lastOpened.title, lastOpened.subjectName);
+                }
+            }
+        }
+
+        function dismissResume() {
+            localStorage.removeItem('lastOpenedFile');
+            document.getElementById('resume-section').classList.add('hidden');
+        }
+        // ==========================================
+
         function toggleDarkMode() {
             const html = document.documentElement;
             const icon = document.getElementById('theme-icon');
@@ -450,7 +518,6 @@
             if (window.location.hash === '#favorites') showFavoritesUI();
         }
 
-        // دالة حفظ وإلغاء حالة إنجاز المحاضرة أوتوماتيكياً برابط الملف كمعرف
         function toggleComplete(link, btnElement) {
             const index = completedFiles.indexOf(link);
             const icon = btnElement.querySelector('i');
@@ -471,7 +538,6 @@
             updateProgressUI();
         }
 
-        // تحديث شريط التقدم ونسبة الإنجاز للملفات الحالية
         function updateProgressUI() {
             const fileCards = document.querySelectorAll('.file-item-card');
             if (fileCards.length === 0) return;
@@ -507,6 +573,7 @@
                         });
                     }
                 }
+                
                 document.getElementById('cache-status').innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i> Ready for instant search!';
                 setTimeout(() => document.getElementById('cache-status').style.display = 'none', 2000);
             } catch (e) {
@@ -546,9 +613,12 @@
             document.getElementById('files-section').classList.add('hidden');
             document.getElementById('favorites-section').classList.add('hidden');
             document.getElementById('search-results-section').classList.add('hidden');
+            
             document.getElementById('subjects-grid').classList.remove('hidden');
             document.getElementById('page-subtitle').innerText = "Search for any lecture or file easily";
             document.getElementById('searchInput').value = '';
+
+            renderResumeCard();
         }
 
         function renderFoldersUI(sub) {
@@ -557,6 +627,7 @@
             document.getElementById('files-section').classList.add('hidden');
             document.getElementById('favorites-section').classList.add('hidden');
             document.getElementById('search-results-section').classList.add('hidden');
+            document.getElementById('resume-section').classList.add('hidden');
             
             document.getElementById('folders-section').classList.remove('hidden');
             document.getElementById('current-subject-title').innerText = sub.title;
@@ -598,10 +669,11 @@
         function renderMediaFolderUI(folder) {
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.remove('hidden');
-            document.getElementById('current-folder-title').innerText = `${currentSubject.title} > ${folder.title}`;
+            
+            document.getElementById('current-folder-title').innerText = `${currentSubject.title} : ${folder.title}`;
+            document.getElementById('current-breadcrumb').innerText = `Subject: ${currentSubject.title} ← Section: ${folder.title}`;
             document.getElementById('back-to-folders').onclick = () => { window.location.hash = `#subject=${currentSubject.id}`; };
 
-            // إخفاء شريط التقدم في قسم فيديوهات يوتيوب (لأنها مش ملفات درايف)
             document.getElementById('progress-container').classList.add('hidden');
 
             const container = document.getElementById('files-container');
@@ -626,7 +698,7 @@
                         <span class="font-bold text-sm break-words">${item.title}</span>
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
-                        <a href="${link}" target="_blank" class="rose-fixed-bg text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
+                        <a href="${link}" target="_blank" onclick="saveLastOpened('${item.title}', '${link}', '${currentSubject.title}', 'video')" class="rose-fixed-bg text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
                             <i class="fas fa-play"></i> Watch
                         </a>
                         <button onclick="toggleFavorite('${item.title}', '${link}', '${currentSubject.title}', '${folder.title}', this)" class="p-2 transition hover:scale-110">
@@ -641,10 +713,11 @@
         async function fetchFilesUI(folderId, folderTitle, sub) {
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.remove('hidden');
-            document.getElementById('current-folder-title').innerText = `${sub.title} > ${folderTitle}`;
+            
+            document.getElementById('current-folder-title').innerText = `${sub.title} : ${folderTitle}`;
+            document.getElementById('current-breadcrumb').innerText = `Subject: ${sub.title} ← Section: ${folderTitle}`;
             document.getElementById('back-to-folders').onclick = () => { window.location.hash = `#subject=${sub.id}`; };
 
-            // إظهار شريط التقدم للملفات
             document.getElementById('progress-container').classList.remove('hidden');
 
             const container = document.getElementById('files-container');
@@ -685,7 +758,7 @@
                             <button onclick="toggleComplete('${file.link}', this)" class="${isCompleted ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-navy-700 text-gray-700 dark:text-gray-300'} px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
                                 <i class="${isCompleted ? 'fas fa-check-circle mr-1 text-white' : 'fas fa-check mr-1 text-gray-500'}"></i> Done
                             </button>
-                            <button onclick="openViewer('${file.link}', '${file.title}')" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
+                            <button onclick="openViewer('${file.link}', '${file.title}', '${sub.title}')" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
                                 <i class="fas fa-eye"></i> View
                             </button>
                             <a href="${downloadUrl}" class="dynamic-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
@@ -699,7 +772,6 @@
                     container.appendChild(card);
                 });
 
-                // حساب وتحديث شريط التقدم عند التحميل
                 updateProgressUI();
 
             } catch (err) {
@@ -718,10 +790,12 @@
             document.getElementById('favorites-section').classList.add('hidden');
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.add('hidden');
+            document.getElementById('resume-section').classList.add('hidden');
 
             if (!query) {
                 searchSec.classList.add('hidden');
                 subjectsGrid.classList.remove('hidden');
+                renderResumeCard();
                 return;
             }
 
@@ -751,7 +825,7 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
-                        <button onclick="openViewer('${item.link}', '${item.title}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs">
+                        <button onclick="openViewer('${item.link}', '${item.title}', '${item.subjectName}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs">
                             <i class="fas fa-eye"></i> View
                         </button>
                         <a href="${downloadUrl}" class="dynamic-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1">
@@ -771,6 +845,8 @@
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.add('hidden');
             document.getElementById('search-results-section').classList.add('hidden');
+            document.getElementById('resume-section').classList.add('hidden');
+            
             document.getElementById('favorites-section').classList.remove('hidden');
 
             const container = document.getElementById('favorites-container');
@@ -799,8 +875,8 @@
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
                         ${isYouTube ? 
-                            `<a href="${item.link}" target="_blank" class="rose-fixed-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i class="fas fa-play"></i> Watch</a>` :
-                            `<button onclick="openViewer('${item.link}', '${item.title}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs"><i class="fas fa-eye"></i> View</button>
+                            `<a href="${item.link}" target="_blank" onclick="saveLastOpened('${item.title}', '${item.link}', '${item.subjectName}', 'video')" class="rose-fixed-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i class="fas fa-play"></i> Watch</a>` :
+                            `<button onclick="openViewer('${item.link}', '${item.title}', '${item.subjectName}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs"><i class="fas fa-eye"></i> View</button>
                              <a href="${downloadUrl}" class="dynamic-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i class="fas fa-download"></i> Download</a>`
                         }
                         <button onclick="toggleFavorite('${item.title}', '${item.link}', '${item.subjectName}', '${item.folderName}', this); showFavoritesUI();" class="p-2 text-red-500 transition hover:scale-110">
@@ -812,7 +888,9 @@
             });
         }
 
-        function openViewer(link, title) {
+        function openViewer(link, title, subjectName = 'Lecture') {
+            saveLastOpened(title, link, subjectName, 'file');
+
             let previewUrl = link;
             if (link.includes('/view')) {
                 previewUrl = link.replace('/view', '/preview');
