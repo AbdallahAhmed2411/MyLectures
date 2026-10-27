@@ -56,7 +56,7 @@
         .dynamic-text { color: var(--primary-color) !important; }
         .dynamic-border { border-color: var(--primary-color) !important; }
 
-        /* 1. تأثير الفولدرات العادية (الإطار وخلفية زجاجية مضيئة بنفس لون الثيم) */
+        /* 1. تأثير الفولدرات العادية */
         .theme-hover-card {
             transition: all 0.2s ease-in-out;
         }
@@ -66,7 +66,7 @@
             transform: translateY(-2px);
         }
 
-        /* 2. تأثير الريكوردز (ثابت بلون بنفسجي) */
+        /* 2. تأثير الريكوردز */
         .recode-hover-card {
             transition: all 0.2s ease-in-out;
         }
@@ -76,7 +76,7 @@
             transform: translateY(-2px);
         }
 
-        /* 3. تأثير الفيديوهات (ثابت بلون روز) */
+        /* 3. تأثير الفيديوهات */
         .video-hover-card {
             transition: all 0.2s ease-in-out;
         }
@@ -187,9 +187,19 @@
             <button id="back-to-folders" class="mb-4 bg-gray-300 dark:bg-navy-700 hover:bg-gray-400 px-4 py-2 rounded-lg transition text-sm">
                 <i class="fas fa-arrow-left mr-2"></i> Back to Sections
             </button>
-            <!-- العنوان ده اتغير لـ dynamic-text عشان يلون مع الثيم -->
             <h2 id="current-folder-title" class="text-lg font-bold dynamic-text mb-4 border-b border-gray-300 dark:border-navy-700 pb-2"></h2>
             
+            <!-- Progress Bar Section -->
+            <div id="progress-container" class="bg-white dark:bg-navy-800 p-3.5 rounded-xl border border-gray-300 dark:border-navy-700 mb-4 shadow-sm">
+                <div class="flex justify-between items-center mb-1.5">
+                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300"><i class="fas fa-tasks dynamic-text mr-1"></i> Section Progress</span>
+                    <span id="progress-text" class="text-xs font-bold dynamic-text">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-navy-900 h-2.5 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="dynamic-bg h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
             <div id="files-loader" class="hidden text-center py-10">
                 <i class="fas fa-circle-notch fa-spin text-3xl dynamic-text mb-2"></i>
                 <p class="text-gray-500 text-sm">Loading files...</p>
@@ -333,6 +343,7 @@
 
         let globalFilesCache = [];
         let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
+        let completedFiles = JSON.parse(localStorage.getItem('myCompletedFiles')) || [];
 
         const savedTheme = localStorage.getItem('appTheme') || 'blue';
         setTheme(savedTheme);
@@ -437,6 +448,45 @@
             updateFavCount();
             
             if (window.location.hash === '#favorites') showFavoritesUI();
+        }
+
+        // دالة حفظ وإلغاء حالة إنجاز المحاضرة أوتوماتيكياً برابط الملف كمعرف
+        function toggleComplete(link, btnElement) {
+            const index = completedFiles.indexOf(link);
+            const icon = btnElement.querySelector('i');
+
+            if (index > -1) {
+                completedFiles.splice(index, 1);
+                btnElement.classList.remove('bg-green-600', 'text-white');
+                btnElement.classList.add('bg-gray-200', 'dark:bg-navy-700', 'text-gray-700', 'dark:text-gray-300');
+                icon.className = "fas fa-check mr-1 text-gray-500";
+            } else {
+                completedFiles.push(link);
+                btnElement.classList.remove('bg-gray-200', 'dark:bg-navy-700', 'text-gray-700', 'dark:text-gray-300');
+                btnElement.classList.add('bg-green-600', 'text-white');
+                icon.className = "fas fa-check-circle mr-1 text-white";
+            }
+
+            localStorage.setItem('myCompletedFiles', JSON.stringify(completedFiles));
+            updateProgressUI();
+        }
+
+        // تحديث شريط التقدم ونسبة الإنجاز للملفات الحالية
+        function updateProgressUI() {
+            const fileCards = document.querySelectorAll('.file-item-card');
+            if (fileCards.length === 0) return;
+
+            let completedCount = 0;
+            fileCards.forEach(card => {
+                const link = card.getAttribute('data-link');
+                if (completedFiles.includes(link)) {
+                    completedCount++;
+                }
+            });
+
+            const percentage = Math.round((completedCount / fileCards.length) * 100);
+            document.getElementById('progress-bar').style.width = percentage + '%';
+            document.getElementById('progress-text').innerText = percentage + '%';
         }
 
         async function initCache() {
@@ -551,6 +601,9 @@
             document.getElementById('current-folder-title').innerText = `${currentSubject.title} > ${folder.title}`;
             document.getElementById('back-to-folders').onclick = () => { window.location.hash = `#subject=${currentSubject.id}`; };
 
+            // إخفاء شريط التقدم في قسم فيديوهات يوتيوب (لأنها مش ملفات درايف)
+            document.getElementById('progress-container').classList.add('hidden');
+
             const container = document.getElementById('files-container');
             document.getElementById('files-loader').classList.add('hidden');
             container.innerHTML = '';
@@ -591,6 +644,9 @@
             document.getElementById('current-folder-title').innerText = `${sub.title} > ${folderTitle}`;
             document.getElementById('back-to-folders').onclick = () => { window.location.hash = `#subject=${sub.id}`; };
 
+            // إظهار شريط التقدم للملفات
+            document.getElementById('progress-container').classList.remove('hidden');
+
             const container = document.getElementById('files-container');
             const loader = document.getElementById('files-loader');
             container.innerHTML = '';
@@ -603,6 +659,7 @@
 
                 if (files.length === 0) {
                     container.innerHTML = '<p class="text-gray-500 text-center py-4">No files available in this section.</p>';
+                    document.getElementById('progress-container').classList.add('hidden');
                     return;
                 }
 
@@ -612,17 +669,22 @@
 
                 files.forEach(file => {
                     const isFav = favorites.some(f => f.link === file.link);
+                    const isCompleted = completedFiles.includes(file.link);
                     const downloadUrl = getDirectDownloadUrl(file.link);
                     
                     const card = document.createElement('div');
-                    card.className = `bg-white dark:bg-navy-800 p-3.5 sm:p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow ${isRecodesFolder ? 'recode-hover-card' : 'theme-hover-card'}`;
+                    card.className = `file-item-card bg-white dark:bg-navy-800 p-3.5 sm:p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow ${isRecodesFolder ? 'recode-hover-card' : 'theme-hover-card'}`;
+                    card.setAttribute('data-link', file.link);
                     
                     card.innerHTML = `
                         <div class="flex items-center gap-3 text-left overflow-hidden w-full sm:w-auto">
                             <i class="${isRecodesFolder ? 'fas fa-microphone text-purple-500' : 'fas fa-file-pdf text-red-500'} text-xl flex-shrink-0"></i>
                             <span class="font-bold text-sm break-words">${file.title}</span>
                         </div>
-                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
+                        <div class="flex items-center flex-wrap gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
+                            <button onclick="toggleComplete('${file.link}', this)" class="${isCompleted ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-navy-700 text-gray-700 dark:text-gray-300'} px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                                <i class="${isCompleted ? 'fas fa-check-circle mr-1 text-white' : 'fas fa-check mr-1 text-gray-500'}"></i> Done
+                            </button>
                             <button onclick="openViewer('${file.link}', '${file.title}')" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
                                 <i class="fas fa-eye"></i> View
                             </button>
@@ -636,9 +698,14 @@
                     `;
                     container.appendChild(card);
                 });
+
+                // حساب وتحديث شريط التقدم عند التحميل
+                updateProgressUI();
+
             } catch (err) {
                 loader.classList.add('hidden');
                 container.innerHTML = '<p class="text-red-500 text-center py-4">Failed to fetch files. Please check sharing permissions.</p>';
+                document.getElementById('progress-container').classList.add('hidden');
             }
         }
 
