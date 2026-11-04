@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
     <title>Lectures Platform</title>
-    <!-- Tailwind CSS Library -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -55,34 +55,20 @@
             --primary-glow: var(--custom-glow, rgba(37, 99, 235, 0.12));
         }
 
-        /* --- تدرجات الوضع المظلم الحصرية (Gradient Dark Themes) --- */
-        [data-theme="blue"].dark body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
-        }
-        [data-theme="purple"].dark body {
-            background: linear-gradient(135deg, #0f172a 0%, #2e1065 100%) !important;
-        }
-        [data-theme="emerald"].dark body {
-            background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%) !important;
-        }
-        [data-theme="amber"].dark body {
-            background: linear-gradient(135deg, #0f172a 0%, #451a03 100%) !important;
-        }
-        [data-theme="rose"].dark body {
-            background: linear-gradient(135deg, #0f172a 0%, #4c0519 100%) !important;
-        }
-        [data-theme="custom"].dark body {
-            background: var(--custom-dark-bg, linear-gradient(135deg, #0f172a 0%, #111827 100%)) !important;
-        }
+        /* --- تدرجات الوضع المظلم --- */
+        [data-theme="blue"].dark body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important; }
+        [data-theme="purple"].dark body { background: linear-gradient(135deg, #0f172a 0%, #2e1065 100%) !important; }
+        [data-theme="emerald"].dark body { background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%) !important; }
+        [data-theme="amber"].dark body { background: linear-gradient(135deg, #0f172a 0%, #451a03 100%) !important; }
+        [data-theme="rose"].dark body { background: linear-gradient(135deg, #0f172a 0%, #4c0519 100%) !important; }
+        [data-theme="custom"].dark body { background: var(--custom-dark-bg, linear-gradient(135deg, #0f172a 0%, #111827 100%)) !important; }
 
         .dynamic-bg { background-color: var(--primary-color) !important; }
         .dynamic-bg:hover { background-color: var(--primary-hover) !important; }
         .dynamic-text { color: var(--primary-color) !important; }
         .dynamic-border { border-color: var(--primary-color) !important; }
 
-        input[type="checkbox"] {
-            accent-color: var(--primary-color);
-        }
+        input[type="checkbox"] { accent-color: var(--primary-color); }
 
         .theme-hover-card { transition: all 0.2s ease-in-out; }
         .theme-hover-card:hover {
@@ -114,6 +100,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-slide-down { animation: slideDown 0.4s ease-out forwards; }
+
+        /* شريط التمرير المخصص */
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; opacity: 0.7; }
     </style>
 </head>
 <body class="min-h-screen p-3 sm:p-6 bg-gray-100 dark:bg-navy-900 text-gray-800 dark:text-white transition-colors duration-300">
@@ -130,7 +122,7 @@
                     <button onclick="toggleThemeMenu()" class="bg-white dark:bg-navy-800 px-3 py-2.5 rounded-xl border border-gray-300 dark:border-navy-700 hover:scale-105 transition shadow flex items-center gap-2 text-sm font-semibold">
                         <i class="fas fa-palette dynamic-text"></i> <span class="hidden sm:inline">Theme</span>
                     </button>
-                    <!-- Theme Dropdown with Custom Color Picker -->
+                    <!-- Theme Dropdown -->
                     <div id="theme-menu" class="absolute left-0 mt-2 w-48 bg-white dark:bg-navy-800 rounded-xl shadow-2xl border border-gray-200 dark:border-navy-700 p-2.5 hidden z-50 space-y-1">
                         <button onclick="setTheme('blue')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-navy-700 flex items-center gap-2 text-sm">
                             <span class="w-3.5 h-3.5 rounded-full bg-blue-600 inline-block"></span> Royal Blue
@@ -155,11 +147,34 @@
                 </div>
             </div>
 
-            <button onclick="window.location.hash = '#favorites'" class="bg-white dark:bg-navy-800 hover:border-[var(--primary-color)] border border-gray-300 dark:border-navy-700 px-3.5 py-2 rounded-xl font-bold flex items-center gap-2 transition-all shadow-sm group text-sm">
-                <i class="fas fa-heart text-red-500 group-hover:scale-125 transition-transform duration-300"></i> 
-                <span class="text-gray-700 dark:text-gray-200">Favorite</span>
-                <span id="fav-count" class="dynamic-bg text-white text-xs px-2.5 py-0.5 rounded-full font-semibold shadow-sm">0</span>
-            </button>
+            <!-- أزرار الهيدر العلوية (أحدث الملفات + المفضلة بجانب بعض) -->
+            <div class="flex items-center gap-2">
+                <!-- زر أحدث الملفات المفتوحة (Dropdown) -->
+                <div class="relative">
+                    <button onclick="toggleRecentMenu()" id="recent-btn-header" class="bg-white dark:bg-navy-800 hover:border-[var(--primary-color)] border border-gray-300 dark:border-navy-700 px-3.5 py-2 rounded-xl font-bold flex items-center gap-2 transition-all shadow-sm text-sm">
+                        <i class="fas fa-history dynamic-text"></i> 
+                        <span class="text-gray-700 dark:text-gray-200 hidden sm:inline">Recent</span>
+                        <span id="recent-badge" class="dynamic-bg text-white text-xs px-2 py-0.2 rounded-full font-semibold shadow-sm">0</span>
+                    </button>
+                    <!-- القائمة المندلة لآخر الملفات -->
+                    <div id="recent-dropdown-menu" class="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-navy-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-navy-700 p-3 hidden z-50 space-y-2">
+                        <div class="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-navy-700 text-xs font-bold">
+                            <span class="dynamic-text"><i class="fas fa-history mr-1"></i> أحدث الملفات المفتوحة</span>
+                            <button onclick="clearRecentFiles()" class="text-red-500 hover:underline"><i class="fas fa-trash-alt"></i> مسح</button>
+                        </div>
+                        <div id="recent-dropdown-container" class="space-y-2 max-h-72 overflow-y-auto custom-scrollbar">
+                            <!-- الملفات تظهر هنا -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- زر المفضلة -->
+                <button onclick="window.location.hash = '#favorites'" class="bg-white dark:bg-navy-800 hover:border-[var(--primary-color)] border border-gray-300 dark:border-navy-700 px-3.5 py-2 rounded-xl font-bold flex items-center gap-2 transition-all shadow-sm group text-sm">
+                    <i class="fas fa-heart text-red-500 group-hover:scale-125 transition-transform duration-300"></i> 
+                    <span class="text-gray-700 dark:text-gray-200 hidden sm:inline">Favorite</span>
+                    <span id="fav-count" class="dynamic-bg text-white text-xs px-2.5 py-0.5 rounded-full font-semibold shadow-sm">0</span>
+                </button>
+            </div>
         </div>
 
         <div class="text-center mb-4">
@@ -199,25 +214,6 @@
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto">
         
-        <div id="resume-section" class="hidden mb-6 px-2 animate-slide-down">
-            <div class="bg-white dark:bg-navy-800 rounded-2xl p-5 shadow-lg relative border border-gray-200 dark:border-navy-700">
-                <button onclick="dismissResume()" class="absolute top-3 right-3 text-gray-400 hover:text-white hover:bg-red-500 w-7 h-7 rounded-full flex items-center justify-center transition text-xs shadow-sm" title="Dismiss">
-                    <i class="fas fa-times"></i>
-                </button>
-
-                <div class="pr-6">
-                    <p class="text-xs font-bold dynamic-text mb-1"><i class="fas fa-history mr-1"></i> Resume Learning</p>
-                    <h3 id="resume-title" class="text-base sm:text-lg font-bold text-gray-800 dark:text-white"></h3>
-                    <p id="resume-subject" class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
-                </div>
-                <div class="mt-4">
-                    <button onclick="resumeLastOpened()" class="dynamic-bg text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition-all inline-flex items-center gap-2 hover:opacity-90">
-                        <i class="fas fa-play"></i> Resume Now
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <div id="search-results-section" class="space-y-3 hidden mb-6">
             <h3 class="text-base font-bold dynamic-text border-b border-gray-300 dark:border-navy-700 pb-2">Search Results:</h3>
             <div id="search-results-container" class="space-y-3"></div>
@@ -245,18 +241,16 @@
             <button id="back-to-folders" class="mb-4 bg-gray-300 dark:bg-navy-700 hover:bg-gray-400 px-4 py-2 rounded-lg transition text-sm">
                 <i class="fas fa-arrow-left mr-2"></i> Back to Sections
             </button>
-            <div class="mb-4 border-b border-gray-300 dark:border-navy-700 pb-2">
-                <h2 id="current-folder-title" class="text-lg font-bold dynamic-text"></h2>
-                <p id="current-breadcrumb" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Browsing current section files</p>
-            </div>
-            
-            <div id="progress-container" class="bg-white dark:bg-navy-800 p-3.5 rounded-xl border border-gray-300 dark:border-navy-700 mb-4 shadow-sm">
-                <div class="flex justify-between items-center mb-1.5">
-                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300"><i class="fas fa-tasks dynamic-text mr-1"></i> Section Progress</span>
-                    <span id="progress-text" class="text-xs font-bold dynamic-text">0%</span>
+            <div class="mb-4 border-b border-gray-300 dark:border-navy-700 pb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <h2 id="current-folder-title" class="text-lg font-bold dynamic-text"></h2>
+                    <p id="current-breadcrumb" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Browsing current section files</p>
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-navy-900 h-2.5 rounded-full overflow-hidden">
-                    <div id="progress-bar" class="dynamic-bg h-full w-0 transition-all duration-300"></div>
+                <!-- Exam Mode Button -->
+                <div id="exam-mode-btn-container" class="hidden">
+                    <button onclick="openExamModalSetup()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-2 transition animate-bounce">
+                        <i class="fas fa-stopwatch text-sm"></i> ابدأ مود الامتحان ⏱️
+                    </button>
                 </div>
             </div>
 
@@ -280,6 +274,39 @@
             <div class="flex-grow w-full relative bg-white">
                 <iframe id="viewer-iframe" class="w-full h-full absolute inset-0" src="" frameborder="0" allow="autoplay"></iframe>
             </div>
+        </div>
+    </div>
+
+    <!-- Exam Mode Setup Modal -->
+    <div id="exam-setup-modal" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-gray-300 dark:border-navy-700 text-center">
+            <div class="text-amber-500 text-3xl mb-2"><i class="fas fa-hourglass-half"></i></div>
+            <h3 class="text-lg font-bold mb-2">إعداد مود الامتحان التجريبي</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">اختر مدة الامتحان (بالدقائق) لحساب الوقت المستغرق بدقة:</p>
+            <select id="exam-duration-select" class="w-full p-2.5 rounded-xl bg-gray-100 dark:bg-navy-900 border border-gray-300 dark:border-navy-700 text-sm mb-4 font-semibold">
+                <option value="15">15 دقيقة (كويز سريع)</option>
+                <option value="30">30 دقيقة (نصف ساعة)</option>
+                <option value="45">45 دقيقة</option>
+                <option value="60" selected>60 دقيقة (ميدتيرم - ساعة)</option>
+                <option value="90">90 دقيقة (ساعة ونصف)</option>
+                <option value="120">120 دقيقة (امتحان نهائي - ساعتان)</option>
+            </select>
+            <div class="flex gap-2">
+                <button onclick="startExamModeSession()" class="flex-grow bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-xl font-bold text-sm shadow">ابدأ التحدي 🚀</button>
+                <button onclick="closeExamSetupModal()" class="bg-gray-300 dark:bg-navy-700 px-4 py-2.5 rounded-xl font-bold text-sm">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Exam Mode Floating Bar -->
+    <div id="active-exam-banner" class="fixed top-0 left-0 right-0 bg-amber-600 text-white py-2 px-4 shadow-lg hidden z-50 flex justify-between items-center text-xs sm:text-sm font-bold">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-stopwatch animate-spin"></i>
+            <span>مود الامتحان شغال: <span id="exam-timer-display" class="bg-black/30 px-2 py-0.5 rounded">00:00</span></span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="hidden sm:inline">ركز في إجاباتك واتحكم في وقتك!</span>
+            <button onclick="finishExamModeSession()" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-xs shadow">إنهاء وحساب الوقت 🛑</button>
         </div>
     </div>
 
@@ -443,9 +470,14 @@
 
         let globalFilesCache = [];
         let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
-        let completedFiles = JSON.parse(localStorage.getItem('myCompletedFiles')) || [];
-        
         let selectedSubjectIds = JSON.parse(localStorage.getItem('selectedSubjectIds')) || subjectsData.map(s => s.id.toString());
+        
+        let recentFiles = JSON.parse(localStorage.getItem('myRecentFiles')) || [];
+
+        let examInterval = null;
+        let examSecondsRemaining = 0;
+        let examElapsedSeconds = 0;
+        let isExamActive = false;
 
         const savedTheme = localStorage.getItem('appTheme') || 'blue';
         if (savedTheme === 'custom') {
@@ -456,6 +488,7 @@
         }
 
         updateFavCount();
+        updateRecentUI();
         initMultiSelectFilter();
         renderSubjects();
         initCache();
@@ -506,37 +539,116 @@
             }
         }
 
-        function saveLastOpened(title, link, subjectName, type) {
-            const lastOpened = { title, link, subjectName, type };
-            localStorage.setItem('lastOpenedFile', JSON.stringify(lastOpened));
-        }
-
-        function renderResumeCard() {
-            const lastOpened = JSON.parse(localStorage.getItem('lastOpenedFile'));
-            const resumeSec = document.getElementById('resume-section');
-            if (lastOpened) {
-                resumeSec.classList.remove('hidden');
-                document.getElementById('resume-title').innerText = lastOpened.title;
-                document.getElementById('resume-subject').innerText = lastOpened.subjectName;
-            } else {
-                resumeSec.classList.add('hidden');
+        function addToRecent(title, link, subjectName, type, folderName = '') {
+            recentFiles = recentFiles.filter(f => f.link !== link);
+            recentFiles.unshift({ title, link, subjectName, type, folderName });
+            
+            if (recentFiles.length > 10) {
+                recentFiles.pop();
             }
+            
+            localStorage.setItem('myRecentFiles', JSON.stringify(recentFiles));
+            updateRecentUI();
         }
 
-        function resumeLastOpened() {
-            const lastOpened = JSON.parse(localStorage.getItem('lastOpenedFile'));
-            if (lastOpened) {
-                if (lastOpened.type === 'video' || lastOpened.link.includes('youtube')) {
-                    window.open(lastOpened.link, '_blank');
-                } else {
-                    openViewer(lastOpened.link, lastOpened.title, lastOpened.subjectName);
+        function clearRecentFiles() {
+            recentFiles = [];
+            localStorage.removeItem('myRecentFiles');
+            updateRecentUI();
+        }
+
+        function toggleRecentMenu() {
+            document.getElementById('recent-dropdown-menu').classList.toggle('hidden');
+        }
+
+        function updateRecentUI() {
+            const badge = document.getElementById('recent-badge');
+            const container = document.getElementById('recent-dropdown-container');
+            
+            badge.innerText = recentFiles.length;
+            container.innerHTML = '';
+
+            if (recentFiles.length === 0) {
+                container.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No recent files opened yet.</p>';
+                return;
+            }
+
+            recentFiles.forEach(item => {
+                const isVideo = item.type === 'video' || item.link.includes('youtube') || item.link.includes('facebook');
+                const isRec = item.folderName.toLowerCase().includes('recode');
+                const icon = isVideo ? 'fa-youtube rose-fixed-text' : (isRec ? 'fa-microphone text-purple-500' : 'fa-file-pdf text-red-500');
+                
+                const card = document.createElement('div');
+                card.className = 'bg-gray-50 dark:bg-navy-900 p-2.5 rounded-xl border border-gray-200 dark:border-navy-700 theme-hover-card cursor-pointer flex items-center gap-2.5';
+                card.onclick = () => {
+                    document.getElementById('recent-dropdown-menu').classList.add('hidden');
+                    if (isVideo) {
+                        addToRecent(item.title, item.link, item.subjectName, 'video', item.folderName);
+                        window.open(item.link, '_blank');
+                    } else {
+                        openViewer(item.link, item.title, item.subjectName, item.folderName);
+                    }
+                };
+                
+                card.innerHTML = `
+                    <i class="${isVideo ? 'fab' : 'fas'} ${icon} text-base flex-shrink-0"></i>
+                    <div class="overflow-hidden w-full">
+                        <h4 class="text-xs font-bold truncate">${item.title}</h4>
+                        <p class="text-[10px] text-gray-400 truncate"><span class="text-blue-400">${item.subjectName}</span> ${item.folderName ? ' - ' + item.folderName : ''}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openExamModalSetup() {
+            document.getElementById('exam-setup-modal').classList.remove('hidden');
+        }
+
+        function closeExamSetupModal() {
+            document.getElementById('exam-setup-modal').classList.add('hidden');
+        }
+
+        function startExamModeSession() {
+            const minutes = parseInt(document.getElementById('exam-duration-select').value);
+            examSecondsRemaining = minutes * 60;
+            examElapsedSeconds = 0;
+            isExamActive = true;
+            closeExamSetupModal();
+
+            document.getElementById('active-exam-banner').classList.remove('hidden');
+            updateExamTimerDisplay();
+
+            if (examInterval) clearInterval(examInterval);
+            examInterval = setInterval(() => {
+                examSecondsRemaining--;
+                examElapsedSeconds++;
+                updateExamTimerDisplay();
+
+                if (examSecondsRemaining <= 0) {
+                    clearInterval(examInterval);
+                    alert("انتهى وقت الامتحان المخصص! تأكد من مراجعة إجاباتك.");
                 }
-            }
+            }, 1000);
         }
 
-        function dismissResume() {
-            localStorage.removeItem('lastOpenedFile');
-            document.getElementById('resume-section').classList.add('hidden');
+        function updateExamTimerDisplay() {
+            const mins = Math.floor(examSecondsRemaining / 60);
+            const secs = examSecondsRemaining % 60;
+            document.getElementById('exam-timer-display').innerText = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function finishExamModeSession() {
+            if (!isExamActive) return;
+            clearInterval(examInterval);
+            isExamActive = false;
+            document.getElementById('active-exam-banner').classList.add('hidden');
+
+            const totalMins = Math.floor(examElapsedSeconds / 60);
+            const totalSecs = examElapsedSeconds % 60;
+
+            alert(`🎉 عاش جداً يا بطل!\nخلصت الامتحان في وقت: ${totalMins} دقيقة و ${totalSecs} ثانية.\nاستمر في التدرب وهتوصل لهدفك!`);
         }
 
         function toggleDarkMode() {
@@ -570,7 +682,6 @@
             document.documentElement.style.setProperty('--custom-hover', adjustBrightness(hexColor, -20));
             document.documentElement.style.setProperty('--custom-glow', hexToRgba(hexColor, 0.12));
             
-            // توليد التدرج المظلم ديناميكياً بناءً على اللون المختار
             document.documentElement.style.setProperty('--custom-dark-bg', `linear-gradient(135deg, #0f172a 0%, ${adjustBrightness(hexColor, -70)} 100%)`);
 
             document.getElementById('customColorPicker').value = hexColor;
@@ -602,6 +713,9 @@
             }
             if (!e.target.closest('#filter-dropdown-menu') && !e.target.closest('button[onclick="toggleFilterDropdown()"]')) {
                 document.getElementById('filter-dropdown-menu').classList.add('hidden');
+            }
+            if (!e.target.closest('#recent-dropdown-menu') && !e.target.closest('button[onclick="toggleRecentMenu()"]')) {
+                document.getElementById('recent-dropdown-menu').classList.add('hidden');
             }
         }
 
@@ -639,44 +753,6 @@
             if (window.location.hash === '#favorites') showFavoritesUI();
         }
 
-        function toggleComplete(link, btnElement) {
-            const index = completedFiles.indexOf(link);
-            const icon = btnElement.querySelector('i');
-
-            if (index > -1) {
-                completedFiles.splice(index, 1);
-                btnElement.classList.remove('bg-green-600', 'text-white');
-                btnElement.classList.add('bg-gray-200', 'dark:bg-navy-700', 'text-gray-700', 'dark:text-gray-300');
-                icon.className = "fas fa-check mr-1 text-gray-500";
-            } else {
-                completedFiles.push(link);
-                btnElement.classList.remove('bg-gray-200', 'dark:bg-navy-700', 'text-gray-700', 'dark:text-gray-300');
-                btnElement.classList.add('bg-green-600', 'text-white');
-                icon.className = "fas fa-check-circle mr-1 text-white";
-            }
-
-            localStorage.setItem('myCompletedFiles', JSON.stringify(completedFiles));
-            updateProgressUI();
-        }
-
-        function updateProgressUI() {
-            const fileCards = document.querySelectorAll('.file-item-card');
-            if (fileCards.length === 0) return;
-
-            let completedCount = 0;
-            fileCards.forEach(card => {
-                const link = card.getAttribute('data-link');
-                if (completedFiles.includes(link)) {
-                    completedCount++;
-                }
-            });
-
-            const percentage = Math.round((completedCount / fileCards.length) * 100);
-            document.getElementById('progress-bar').style.width = percentage + '%';
-            document.getElementById('progress-text').innerText = percentage + '%';
-        }
-
-        // --- Multi-Select Filter Logic ---
         function toggleFilterDropdown() {
             document.getElementById('filter-dropdown-menu').classList.toggle('hidden');
         }
@@ -803,10 +879,9 @@
             document.getElementById('subjects-grid').classList.remove('hidden');
             document.getElementById('page-subtitle').innerText = "Search for any lecture or file easily";
             document.getElementById('searchInput').value = '';
+            
             initMultiSelectFilter();
             renderSubjects();
-
-            renderResumeCard();
         }
 
         function renderFoldersUI(sub) {
@@ -815,7 +890,6 @@
             document.getElementById('files-section').classList.add('hidden');
             document.getElementById('favorites-section').classList.add('hidden');
             document.getElementById('search-results-section').classList.add('hidden');
-            document.getElementById('resume-section').classList.add('hidden');
             
             document.getElementById('folders-section').classList.remove('hidden');
             document.getElementById('current-subject-title').innerText = sub.title;
@@ -857,12 +931,11 @@
         function renderMediaFolderUI(folder) {
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.remove('hidden');
+            document.getElementById('exam-mode-btn-container').classList.add('hidden');
             
             document.getElementById('current-folder-title').innerText = `${currentSubject.title} : ${folder.title}`;
             document.getElementById('current-breadcrumb').innerText = `Subject: ${currentSubject.title} ← Section: ${folder.title}`;
             document.getElementById('back-to-folders').onclick = () => { window.location.hash = `#subject=${currentSubject.id}`; };
-
-            document.getElementById('progress-container').classList.add('hidden');
 
             const container = document.getElementById('files-container');
             document.getElementById('files-loader').classList.add('hidden');
@@ -888,7 +961,7 @@
                         <span class="font-bold text-sm break-words" style="${titleStyle}">${item.title}</span>
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
-                        <a href="${link}" target="_blank" onclick="saveLastOpened('${item.title}', '${link}', '${currentSubject.title}', 'video')" class="${isFacebook ? 'bg-blue-600 hover:bg-blue-700' : 'rose-fixed-bg'} text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
+                        <a href="${link}" target="_blank" onclick="addToRecent('${item.title}', '${link}', '${currentSubject.title}', 'video', '${folder.title}')" class="${isFacebook ? 'bg-blue-600 hover:bg-blue-700' : 'rose-fixed-bg'} text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
                             <i class="${isFacebook ? 'fas fa-external-link-alt' : 'fas fa-play'}"></i> ${isFacebook ? 'Open FB' : 'Watch'}
                         </a>
                         <button onclick="toggleFavorite('${item.title}', '${link}', '${currentSubject.title}', '${folder.title}', this)" class="p-2 transition hover:scale-110">
@@ -918,6 +991,7 @@
         function renderAlternativeVideosUI(altFolder, sub) {
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.remove('hidden');
+            document.getElementById('exam-mode-btn-container').classList.add('hidden');
             
             document.getElementById('current-folder-title').innerText = `${sub.title} : ${altFolder.title}`;
             document.getElementById('current-breadcrumb').innerText = `Subject: ${sub.title} ← Videos ← Alternative Source`;
@@ -925,8 +999,6 @@
                 const vidFolder = sub.folders.find(f => f.title === 'Videos');
                 renderMediaFolderUI(vidFolder);
             };
-
-            document.getElementById('progress-container').classList.add('hidden');
 
             const container = document.getElementById('files-container');
             document.getElementById('files-loader').classList.add('hidden');
@@ -951,7 +1023,7 @@
                         <span class="font-bold text-sm break-words" style="${titleStyle}">${item.title}</span>
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
-                        <a href="${link}" target="_blank" onclick="saveLastOpened('${item.title}', '${link}', '${sub.title}', 'video')" class="${isFacebook ? 'bg-blue-600 hover:bg-blue-700' : 'rose-fixed-bg'} text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
+                        <a href="${link}" target="_blank" onclick="addToRecent('${item.title}', '${link}', '${sub.title}', 'video', 'Alternative Source')" class="${isFacebook ? 'bg-blue-600 hover:bg-blue-700' : 'rose-fixed-bg'} text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
                             <i class="${isFacebook ? 'fas fa-external-link-alt' : 'fas fa-play'}"></i> ${isFacebook ? 'Open FB' : 'Watch'}
                         </a>
                         <button onclick="toggleFavorite('${item.title}', '${link}', '${sub.title}', 'Alternative Source', this)" class="p-2 transition hover:scale-110">
@@ -967,11 +1039,15 @@
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.remove('hidden');
             
+            if (folderTitle.toLowerCase().includes('exam')) {
+                document.getElementById('exam-mode-btn-container').classList.remove('hidden');
+            } else {
+                document.getElementById('exam-mode-btn-container').classList.add('hidden');
+            }
+            
             document.getElementById('current-folder-title').innerText = `${sub.title} : ${folderTitle}`;
             document.getElementById('current-breadcrumb').innerText = `Subject: ${sub.title} ← Section: ${folderTitle}`;
             document.getElementById('back-to-folders').onclick = () => { window.location.hash = `#subject=${sub.id}`; };
-
-            document.getElementById('progress-container').classList.remove('hidden');
 
             const container = document.getElementById('files-container');
             const loader = document.getElementById('files-loader');
@@ -985,7 +1061,6 @@
 
                 if (files.length === 0) {
                     container.innerHTML = '<p class="text-gray-500 text-center py-4">No files available in this section.</p>';
-                    document.getElementById('progress-container').classList.add('hidden');
                     return;
                 }
 
@@ -995,7 +1070,6 @@
 
                 files.forEach(file => {
                     const isFav = favorites.some(f => f.link === file.link);
-                    const isCompleted = completedFiles.includes(file.link);
                     const downloadUrl = getDirectDownloadUrl(file.link);
                     
                     const card = document.createElement('div');
@@ -1008,10 +1082,7 @@
                             <span class="font-bold text-sm break-words">${file.title}</span>
                         </div>
                         <div class="flex items-center flex-wrap gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
-                            <button onclick="toggleComplete('${file.link}', this)" class="${isCompleted ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-navy-700 text-gray-700 dark:text-gray-300'} px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
-                                <i class="${isCompleted ? 'fas fa-check-circle mr-1 text-white' : 'fas fa-check mr-1 text-gray-500'}"></i> Done
-                            </button>
-                            <button onclick="openViewer('${file.link}', '${file.title}', '${sub.title}')" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
+                            <button onclick="openViewer('${file.link}', '${file.title}', '${sub.title}', '${folderTitle}')" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
                                 <i class="fas fa-eye"></i> View
                             </button>
                             <a href="${downloadUrl}" class="dynamic-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
@@ -1025,12 +1096,9 @@
                     container.appendChild(card);
                 });
 
-                updateProgressUI();
-
             } catch (err) {
                 loader.classList.add('hidden');
                 container.innerHTML = '<p class="text-red-500 text-center py-4">Failed to fetch files. Please check sharing permissions.</p>';
-                document.getElementById('progress-container').classList.add('hidden');
             }
         }
 
@@ -1043,12 +1111,10 @@
             document.getElementById('favorites-section').classList.add('hidden');
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.add('hidden');
-            document.getElementById('resume-section').classList.add('hidden');
 
             if (!query) {
                 searchSec.classList.add('hidden');
                 subjectsGrid.classList.remove('hidden');
-                renderResumeCard();
                 return;
             }
 
@@ -1083,7 +1149,7 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
-                        <button onclick="openViewer('${item.link}', '${item.title}', '${item.subjectName}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs">
+                        <button onclick="openViewer('${item.link}', '${item.title}', '${item.subjectName}', '${item.folderName}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs">
                             <i class="fas fa-eye"></i> View
                         </button>
                         <a href="${downloadUrl}" class="dynamic-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1">
@@ -1103,7 +1169,6 @@
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.add('hidden');
             document.getElementById('search-results-section').classList.add('hidden');
-            document.getElementById('resume-section').classList.add('hidden');
             
             document.getElementById('favorites-section').classList.remove('hidden');
 
@@ -1138,8 +1203,8 @@
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
                         ${isYouTube ? 
-                            `<a href="${item.link}" target="_blank" onclick="saveLastOpened('${item.title}', '${item.link}', '${item.subjectName}', 'video')" class="rose-fixed-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i class="fas fa-play"></i> Watch</a>` :
-                            `<button onclick="openViewer('${item.link}', '${item.title}', '${item.subjectName}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs"><i class="fas fa-eye"></i> View</button>
+                            `<a href="${item.link}" target="_blank" onclick="addToRecent('${item.title}', '${item.link}', '${item.subjectName}', 'video', '${item.folderName}')" class="rose-fixed-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i class="fas fa-play"></i> Watch</a>` :
+                            `<button onclick="openViewer('${item.link}', '${item.title}', '${item.subjectName}', '${item.folderName}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs"><i class="fas fa-eye"></i> View</button>
                              <a href="${downloadUrl}" class="dynamic-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"><i class="fas fa-download"></i> Download</a>`
                         }
                         <button onclick="toggleFavorite('${item.title}', '${item.link}', '${item.subjectName}', '${item.folderName}', this); showFavoritesUI();" class="p-2 text-red-500 transition hover:scale-110">
@@ -1151,8 +1216,8 @@
             });
         }
 
-        function openViewer(link, title, subjectName = 'Lecture') {
-            saveLastOpened(title, link, subjectName, 'file');
+        function openViewer(link, title, subjectName = 'Lecture', folderName = '') {
+            addToRecent(title, link, subjectName, 'file', folderName);
 
             let previewUrl = link;
             if (link.includes('/view')) {
