@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="favicon.png">
     <title>Lectures Platform</title>
+    <!-- Tailwind CSS Library -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -159,8 +160,8 @@
                     <!-- القائمة المندلة لآخر الملفات -->
                     <div id="recent-dropdown-menu" class="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-navy-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-navy-700 p-3 hidden z-50 space-y-2">
                         <div class="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-navy-700 text-xs font-bold">
-                            <span class="dynamic-text"><i class="fas fa-history mr-1"></i> أحدث الملفات المفتوحة</span>
-                            <button onclick="clearRecentFiles()" class="text-red-500 hover:underline"><i class="fas fa-trash-alt"></i> مسح</button>
+                            <span class="dynamic-text"><i class="fas fa-history mr-1"></i> Recent Files</span>
+                            <button onclick="clearRecentFiles()" class="text-red-500 hover:underline"><i class="fas fa-trash-alt"></i> Clear</button>
                         </div>
                         <div id="recent-dropdown-container" class="space-y-2 max-h-72 overflow-y-auto custom-scrollbar">
                             <!-- الملفات تظهر هنا -->
@@ -246,12 +247,6 @@
                     <h2 id="current-folder-title" class="text-lg font-bold dynamic-text"></h2>
                     <p id="current-breadcrumb" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Browsing current section files</p>
                 </div>
-                <!-- Exam Mode Button -->
-                <div id="exam-mode-btn-container" class="hidden">
-                    <button onclick="openExamModalSetup()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-2 transition animate-bounce">
-                        <i class="fas fa-stopwatch text-sm"></i> ابدأ مود الامتحان ⏱️
-                    </button>
-                </div>
             </div>
 
             <div id="files-loader" class="hidden text-center py-10">
@@ -274,39 +269,6 @@
             <div class="flex-grow w-full relative bg-white">
                 <iframe id="viewer-iframe" class="w-full h-full absolute inset-0" src="" frameborder="0" allow="autoplay"></iframe>
             </div>
-        </div>
-    </div>
-
-    <!-- Exam Mode Setup Modal -->
-    <div id="exam-setup-modal" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-gray-300 dark:border-navy-700 text-center">
-            <div class="text-amber-500 text-3xl mb-2"><i class="fas fa-hourglass-half"></i></div>
-            <h3 class="text-lg font-bold mb-2">إعداد مود الامتحان التجريبي</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">اختر مدة الامتحان (بالدقائق) لحساب الوقت المستغرق بدقة:</p>
-            <select id="exam-duration-select" class="w-full p-2.5 rounded-xl bg-gray-100 dark:bg-navy-900 border border-gray-300 dark:border-navy-700 text-sm mb-4 font-semibold">
-                <option value="15">15 دقيقة (كويز سريع)</option>
-                <option value="30">30 دقيقة (نصف ساعة)</option>
-                <option value="45">45 دقيقة</option>
-                <option value="60" selected>60 دقيقة (ميدتيرم - ساعة)</option>
-                <option value="90">90 دقيقة (ساعة ونصف)</option>
-                <option value="120">120 دقيقة (امتحان نهائي - ساعتان)</option>
-            </select>
-            <div class="flex gap-2">
-                <button onclick="startExamModeSession()" class="flex-grow bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-xl font-bold text-sm shadow">ابدأ التحدي 🚀</button>
-                <button onclick="closeExamSetupModal()" class="bg-gray-300 dark:bg-navy-700 px-4 py-2.5 rounded-xl font-bold text-sm">إلغاء</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Active Exam Mode Floating Bar -->
-    <div id="active-exam-banner" class="fixed top-0 left-0 right-0 bg-amber-600 text-white py-2 px-4 shadow-lg hidden z-50 flex justify-between items-center text-xs sm:text-sm font-bold">
-        <div class="flex items-center gap-2">
-            <i class="fas fa-stopwatch animate-spin"></i>
-            <span>مود الامتحان شغال: <span id="exam-timer-display" class="bg-black/30 px-2 py-0.5 rounded">00:00</span></span>
-        </div>
-        <div class="flex items-center gap-3">
-            <span class="hidden sm:inline">ركز في إجاباتك واتحكم في وقتك!</span>
-            <button onclick="finishExamModeSession()" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-xs shadow">إنهاء وحساب الوقت 🛑</button>
         </div>
     </div>
 
@@ -474,11 +436,6 @@
         
         let recentFiles = JSON.parse(localStorage.getItem('myRecentFiles')) || [];
 
-        let examInterval = null;
-        let examSecondsRemaining = 0;
-        let examElapsedSeconds = 0;
-        let isExamActive = false;
-
         const savedTheme = localStorage.getItem('appTheme') || 'blue';
         if (savedTheme === 'custom') {
             const savedCustomColor = localStorage.getItem('customPrimaryColor') || '#2563eb';
@@ -599,56 +556,6 @@
                 `;
                 container.appendChild(card);
             });
-        }
-
-        function openExamModalSetup() {
-            document.getElementById('exam-setup-modal').classList.remove('hidden');
-        }
-
-        function closeExamSetupModal() {
-            document.getElementById('exam-setup-modal').classList.add('hidden');
-        }
-
-        function startExamModeSession() {
-            const minutes = parseInt(document.getElementById('exam-duration-select').value);
-            examSecondsRemaining = minutes * 60;
-            examElapsedSeconds = 0;
-            isExamActive = true;
-            closeExamSetupModal();
-
-            document.getElementById('active-exam-banner').classList.remove('hidden');
-            updateExamTimerDisplay();
-
-            if (examInterval) clearInterval(examInterval);
-            examInterval = setInterval(() => {
-                examSecondsRemaining--;
-                examElapsedSeconds++;
-                updateExamTimerDisplay();
-
-                if (examSecondsRemaining <= 0) {
-                    clearInterval(examInterval);
-                    alert("انتهى وقت الامتحان المخصص! تأكد من مراجعة إجاباتك.");
-                }
-            }, 1000);
-        }
-
-        function updateExamTimerDisplay() {
-            const mins = Math.floor(examSecondsRemaining / 60);
-            const secs = examSecondsRemaining % 60;
-            document.getElementById('exam-timer-display').innerText = 
-                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        function finishExamModeSession() {
-            if (!isExamActive) return;
-            clearInterval(examInterval);
-            isExamActive = false;
-            document.getElementById('active-exam-banner').classList.add('hidden');
-
-            const totalMins = Math.floor(examElapsedSeconds / 60);
-            const totalSecs = examElapsedSeconds % 60;
-
-            alert(`🎉 عاش جداً يا بطل!\nخلصت الامتحان في وقت: ${totalMins} دقيقة و ${totalSecs} ثانية.\nاستمر في التدرب وهتوصل لهدفك!`);
         }
 
         function toggleDarkMode() {
@@ -931,7 +838,6 @@
         function renderMediaFolderUI(folder) {
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.remove('hidden');
-            document.getElementById('exam-mode-btn-container').classList.add('hidden');
             
             document.getElementById('current-folder-title').innerText = `${currentSubject.title} : ${folder.title}`;
             document.getElementById('current-breadcrumb').innerText = `Subject: ${currentSubject.title} ← Section: ${folder.title}`;
@@ -991,7 +897,6 @@
         function renderAlternativeVideosUI(altFolder, sub) {
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.remove('hidden');
-            document.getElementById('exam-mode-btn-container').classList.add('hidden');
             
             document.getElementById('current-folder-title').innerText = `${sub.title} : ${altFolder.title}`;
             document.getElementById('current-breadcrumb').innerText = `Subject: ${sub.title} ← Videos ← Alternative Source`;
@@ -1038,12 +943,6 @@
         async function fetchFilesUI(folderId, folderTitle, sub) {
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.remove('hidden');
-            
-            if (folderTitle.toLowerCase().includes('exam')) {
-                document.getElementById('exam-mode-btn-container').classList.remove('hidden');
-            } else {
-                document.getElementById('exam-mode-btn-container').classList.add('hidden');
-            }
             
             document.getElementById('current-folder-title').innerText = `${sub.title} : ${folderTitle}`;
             document.getElementById('current-breadcrumb').innerText = `Subject: ${sub.title} ← Section: ${folderTitle}`;
