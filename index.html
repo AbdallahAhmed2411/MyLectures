@@ -180,17 +180,17 @@
 
         <div class="text-center mb-4">
             <h1 class="text-3xl font-bold dynamic-text mb-1">My Lectures</h1>
-            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400" id="page-subtitle">Search for any lecture or file easily</p>
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400" id="page-subtitle">Lightning-fast instant lectures platform</p>
         </div>
         
         <div id="cache-status" class="text-xs text-yellow-600 dark:text-yellow-400 mb-3 text-center font-semibold">
-            <i class="fas fa-spinner fa-spin mr-1"></i> Preparing instant search index...
+            <i class="fas fa-spinner fa-spin mr-1"></i> Preloading files for lightning-fast navigation...
         </div>
         
         <!-- Search & Multi-Select Subject Filter -->
         <div class="flex flex-col sm:flex-row gap-2 max-w-xl mx-auto px-2">
             <div class="relative flex-grow">
-                <input type="text" id="searchInput" placeholder="Search for lecture name here..." onkeyup="globalSearch()" class="w-full px-4 py-3 pl-10 bg-white dark:bg-navy-800 border border-gray-300 dark:border-navy-700 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none dynamic-border transition shadow-inner text-sm">
+                <input type="text" id="searchInput" placeholder="Search for any lecture instantly..." onkeyup="globalSearch()" class="w-full px-4 py-3 pl-10 bg-white dark:bg-navy-800 border border-gray-300 dark:border-navy-700 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none dynamic-border transition shadow-inner text-sm">
                 <i class="fas fa-search absolute top-3.5 left-5 text-gray-400"></i>
             </div>
             <!-- Multi-Select Dropdown Button -->
@@ -251,7 +251,7 @@
 
             <div id="files-loader" class="hidden text-center py-10">
                 <i class="fas fa-circle-notch fa-spin text-3xl dynamic-text mb-2"></i>
-                <p class="text-gray-500 text-sm">Loading files...</p>
+                <p class="text-gray-500 text-sm">Loading files instantly...</p>
             </div>
             <div id="files-container" class="space-y-3"></div>
         </div>
@@ -370,8 +370,7 @@
             {
                 id: 3, title: 'DSS', icon: 'fa-database',
                 folders: [
-                    // 👇 تم دمج الـ ID بتاعك وبتاع زميلك معاً لمادة DSS بنجاح
-                    { title: 'Lectures', type: 'drive', id: '1kIG7NdWT5tiT6muIEnTeQpLrX9cG530v' },
+                    { title: 'Lectures', type: 'drive', id: ['1kIG7NdWT5tiT6muIEnTeQpLrX9cG530v', '18iL1rAuLuxoOHCBh4XK4ntZp_eb4nef6'] },
                     { title: 'Questions', type: 'drive', id: '11EvVeAcgNKvghDfBIYp9vH0T9p9BWBxD'},
                     { title: 'Summaries', type: 'drive', id: '17TiSmLQDV12Qv9DVROOloFSDoUUezZRw'},
                     { title: 'Sections', type: 'drive', id: '10UXwr1kNU3AgF5vHcdL9z1u0J1rMF4nF' },
@@ -405,7 +404,8 @@
                 folders: [
                     { title: 'Lectures', type: 'drive', id: '1-iozVC96T-Kx1USZZ4gb4C3rGQpmdNr9' },
                     { title: 'Questions', type: 'drive', id: '1M0hA9qLprbYJj2QlmnaIcQwTJ8GyVOni'},
-                    { title: 'Summaries', type: 'drive', id: '12FUiEGX3NSvtRUS7nzw--PFB0VM7ZiX4' }
+                    { title: 'Summaries', type: 'drive', id: '12FUiEGX3NSvtRUS7nzw--PFB0VM7ZiX4' },
+                    { title: 'Recodes', type: 'drive', id: '1hzJXsu_PblyU8QS6vMB_0dfmevL-wEkm' }
                 ]
             },
             {
@@ -430,19 +430,19 @@
                 ]
             },
             {
-                id:9, title:'Physical Fitness', icon:'fa-running',
+                id: 9, title: 'Physical Fitness', icon: 'fa-running',
                 folders: [
-                    {title:'Lectures',type:'drive',id:'1-1lMvKIqR4nIH9cZAIIQ9iR_FV5Sz4wK'},
-                    {title:'Questions',type:'drive',id:'1MI5eV_DwUHnSQHkvbzSameL6FqJoirEr'},
-                    {title:'Summaries',type:'drive',id:'1byrR-4Ig-wYhQOdszZPw4-DoglQ5wael'}
+                    { title: 'Lectures', type: 'drive', id: '1-1lMvKIqR4nIH9cZAIIQ9iR_FV5Sz4wK' },
+                    { title: 'Questions', type: 'drive', id: '1MI5eV_DwUHnSQHkvbzSameL6FqJoirEr' },
+                    { title: 'Summaries', type: 'drive', id: '1byrR-4Ig-wYhQOdszZPw4-DoglQ5wael' }
                 ]
             }
         ];
 
         let globalFilesCache = [];
+        let foldersFilesCache = {}; // تخزين مؤقت محلي لكل فولدر لتشغيل السرعة الفورية
         let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
         let selectedSubjectIds = JSON.parse(localStorage.getItem('selectedSubjectIds')) || subjectsData.map(s => s.id.toString());
-        
         let recentFiles = JSON.parse(localStorage.getItem('myRecentFiles')) || [];
 
         const savedTheme = localStorage.getItem('appTheme') || 'blue';
@@ -457,7 +457,9 @@
         updateRecentUI();
         initMultiSelectFilter();
         renderSubjects();
-        initCache();
+        
+        // تشغيل التحميل الفوري في الخلفية
+        initFullCache();
 
         if (window.location.hash) {
             window.location.hash = '#home';
@@ -487,7 +489,7 @@
                         if (folder.type === 'youtube') {
                             renderMediaFolderUI(folder);
                         } else {
-                            fetchFilesUI(folder.id, folder.title, sub);
+                            renderFolderFilesFast(folder, sub);
                         }
                     }
                 }
@@ -502,6 +504,43 @@
                 }
             } else if (hash === '#favorites') {
                 showFavoritesUI();
+            }
+        }
+
+        // دالة التخزين المؤقت الشامل لتحقيق سرعة صاروخية
+        async function initFullCache() {
+            try {
+                for (let sub of subjectsData) {
+                    for (let folder of sub.folders) {
+                        if (folder.type === 'youtube' || folder.type === 'telegram') continue;
+                        
+                        const idsArray = Array.isArray(folder.id) ? folder.id : [folder.id];
+                        let folderFiles = [];
+
+                        for (let id of idsArray) {
+                            const res = await fetch(`${API_URL}?folderId=${id}`);
+                            const files = await res.json();
+                            folderFiles = folderFiles.concat(files);
+                        }
+
+                        folderFiles.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: 'base' }));
+
+                        // تخزين الملفات في الكاش الخاص بالفولدر لسرعة العرض الفوري
+                        foldersFilesCache[`${sub.id}_${folder.title}`] = folderFiles;
+
+                        folderFiles.forEach(f => {
+                            globalFilesCache.push({
+                                title: f.title, link: f.link,
+                                subjectName: sub.title, folderName: folder.title, subjectId: sub.id
+                            });
+                        });
+                    }
+                }
+                
+                document.getElementById('cache-status').innerHTML = '<i class="fas fa-bolt text-green-500 mr-1"></i> Ready! Lightning-fast navigation enabled.';
+                setTimeout(() => document.getElementById('cache-status').style.display = 'none', 2000);
+            } catch (e) {
+                document.getElementById('cache-status').style.display = 'none';
             }
         }
 
@@ -725,39 +764,6 @@
             }
         }
 
-        async function initCache() {
-            try {
-                for (let sub of subjectsData) {
-                    for (let folder of sub.folders) {
-                        if (folder.type === 'youtube' || folder.type === 'telegram') continue;
-                        
-                        const idsArray = Array.isArray(folder.id) ? folder.id : [folder.id];
-                        let folderFiles = [];
-
-                        for (let id of idsArray) {
-                            const res = await fetch(`${API_URL}?folderId=${id}`);
-                            const files = await res.json();
-                            folderFiles = folderFiles.concat(files);
-                        }
-
-                        folderFiles.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: 'base' }));
-
-                        folderFiles.forEach(f => {
-                            globalFilesCache.push({
-                                title: f.title, link: f.link,
-                                subjectName: sub.title, folderName: folder.title, subjectId: sub.id
-                            });
-                        });
-                    }
-                }
-                
-                document.getElementById('cache-status').innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i> Ready for instant search!';
-                setTimeout(() => document.getElementById('cache-status').style.display = 'none', 2000);
-            } catch (e) {
-                document.getElementById('cache-status').style.display = 'none';
-            }
-        }
-
         function renderSubjects() {
             const grid = document.getElementById('subjects-grid');
             grid.innerHTML = '';
@@ -800,7 +806,7 @@
             document.getElementById('search-results-section').classList.add('hidden');
             
             document.getElementById('subjects-grid').classList.remove('hidden');
-            document.getElementById('page-subtitle').innerText = "Search for any lecture or file easily";
+            document.getElementById('page-subtitle').innerText = "Lightning-fast instant lectures platform";
             document.getElementById('searchInput').value = '';
             
             initMultiSelectFilter();
@@ -826,11 +832,6 @@
                 
                 if (isVideo) {
                     card.onclick = () => { window.location.hash = `#folder=${sub.id}&${encodeURIComponent(folder.title)}`; };
-                    card.className = 'bg-white dark:bg-navy-800 p-4 rounded-xl cursor-pointer video-hover-card border border-gray-300 dark:border-navy-700 shadow flex justify-between items-center';
-                } else if (folder.type === 'youtube-playlist') {
-                    card.onclick = () => {
-                        window.open(`https://www.youtube.com/playlist?list=${folder.playlistId}`, '_blank');
-                    };
                     card.className = 'bg-white dark:bg-navy-800 p-4 rounded-xl cursor-pointer video-hover-card border border-gray-300 dark:border-navy-700 shadow flex justify-between items-center';
                 } else if (isRec) {
                     card.onclick = () => { window.location.hash = `#folder=${sub.id}&${encodeURIComponent(folder.title)}`; };
@@ -956,73 +957,83 @@
             });
         }
 
-        // دالة جلب الملفات المحدثة لجمع ملفات المجلدات المتعددة معاً
-        async function fetchFilesUI(folderId, folderTitle, sub) {
+        // عرض الملفات فوري وصاروخي اعتماداً على التخزين المؤقت المحلي
+        async function renderFolderFilesFast(folder, sub) {
             document.getElementById('folders-section').classList.add('hidden');
             document.getElementById('files-section').classList.remove('hidden');
             
-            document.getElementById('current-folder-title').innerText = `${sub.title} : ${folderTitle}`;
-            document.getElementById('current-breadcrumb').innerText = `Subject: ${sub.title} ← Section: ${folderTitle}`;
+            document.getElementById('current-folder-title').innerText = `${sub.title} : ${folder.title}`;
+            document.getElementById('current-breadcrumb').innerText = `Subject: ${sub.title} ← Section: ${folder.title}`;
             document.getElementById('back-to-folders').onclick = () => { window.location.hash = `#subject=${sub.id}`; };
 
             const container = document.getElementById('files-container');
             const loader = document.getElementById('files-loader');
             container.innerHTML = '';
-            loader.classList.remove('hidden');
 
-            try {
-                let allFiles = [];
-                const idsArray = Array.isArray(folderId) ? folderId : [folderId];
+            const cacheKey = `${sub.id}_${folder.title}`;
+            const cachedFiles = foldersFilesCache[cacheKey];
 
-                for (let id of idsArray) {
-                    const res = await fetch(`${API_URL}?folderId=${id}`);
-                    const files = await res.json();
-                    allFiles = allFiles.concat(files);
-                }
-
+            if (cachedFiles && cachedFiles.length > 0) {
                 loader.classList.add('hidden');
+                displayFilesList(cachedFiles, sub.title, folder.title, container);
+            } else {
+                loader.classList.remove('hidden');
+                try {
+                    let allFiles = [];
+                    const idsArray = Array.isArray(folder.id) ? folder.id : [folder.id];
 
-                if (allFiles.length === 0) {
-                    container.innerHTML = '<p class="text-gray-500 text-center py-4">No files available in this section.</p>';
-                    return;
+                    for (let id of idsArray) {
+                        const res = await fetch(`${API_URL}?folderId=${id}`);
+                        const files = await res.json();
+                        allFiles = allFiles.concat(files);
+                    }
+
+                    loader.classList.add('hidden');
+                    allFiles.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: 'base' }));
+                    foldersFilesCache[cacheKey] = allFiles;
+                    
+                    if (allFiles.length === 0) {
+                        container.innerHTML = '<p class="text-gray-500 text-center py-4">No files available in this section.</p>';
+                        return;
+                    }
+                    displayFilesList(allFiles, sub.title, folder.title, container);
+                } catch (err) {
+                    loader.classList.add('hidden');
+                    container.innerHTML = '<p class="text-red-500 text-center py-4">Failed to fetch files. Please check sharing permissions.</p>';
                 }
-
-                allFiles.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: 'base' }));
-
-                const isRecodesFolder = folderTitle.toLowerCase().includes('recode');
-
-                allFiles.forEach(file => {
-                    const isFav = favorites.some(f => f.link === file.link);
-                    const downloadUrl = getDirectDownloadUrl(file.link);
-                    
-                    const card = document.createElement('div');
-                    card.className = `file-item-card bg-white dark:bg-navy-800 p-3.5 sm:p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow ${isRecodesFolder ? 'recode-hover-card' : 'theme-hover-card'}`;
-                    card.setAttribute('data-link', file.link);
-                    
-                    card.innerHTML = `
-                        <div class="flex items-center gap-3 text-left overflow-hidden w-full sm:w-auto">
-                            <i class="${isRecodesFolder ? 'fas fa-microphone text-purple-500' : 'fas fa-file-pdf text-red-500'} text-xl flex-shrink-0"></i>
-                            <span class="font-bold text-sm break-words">${file.title}</span>
-                        </div>
-                        <div class="flex items-center flex-wrap gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
-                            <button onclick="openViewer('${file.link}', '${file.title}', '${sub.title}', '${folderTitle}')" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                            <a href="${downloadUrl}" class="dynamic-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
-                                <i class="fas fa-download"></i> Download
-                            </a>
-                            <button onclick="toggleFavorite('${file.title}', '${file.link}', '${sub.title}', '${folderTitle}', this)" class="p-2 transition hover:scale-110">
-                                <i class="${isFav ? 'fas text-red-500' : 'far text-gray-400'} fa-heart text-lg"></i>
-                            </button>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-
-            } catch (err) {
-                loader.classList.add('hidden');
-                container.innerHTML = '<p class="text-red-500 text-center py-4">Failed to fetch files. Please check sharing permissions.</p>';
             }
+        }
+
+        function displayFilesList(files, subjectName, folderTitle, container) {
+            container.innerHTML = '';
+            const isRecodesFolder = folderTitle.toLowerCase().includes('recode');
+
+            files.forEach(file => {
+                const isFav = favorites.some(f => f.link === file.link);
+                const downloadUrl = getDirectDownloadUrl(file.link);
+                
+                const card = document.createElement('div');
+                card.className = `file-item-card bg-white dark:bg-navy-800 p-3.5 sm:p-4 rounded-xl border border-gray-300 dark:border-navy-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow ${isRecodesFolder ? 'recode-hover-card' : 'theme-hover-card'}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 text-left overflow-hidden w-full sm:w-auto">
+                        <i class="${isRecodesFolder ? 'fas fa-microphone text-purple-500' : 'fas fa-file-pdf text-red-500'} text-xl flex-shrink-0"></i>
+                        <span class="font-bold text-sm break-words">${file.title}</span>
+                    </div>
+                    <div class="flex items-center flex-wrap gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-navy-700">
+                        <button onclick="openViewer('${file.link}', '${file.title}', '${subjectName}', '${folderTitle}')" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <a href="${downloadUrl}" class="dynamic-bg text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                        <button onclick="toggleFavorite('${file.title}', '${file.link}', '${subjectName}', '${folderTitle}', this)" class="p-2 transition hover:scale-110">
+                            <i class="${isFav ? 'fas text-red-500' : 'far text-gray-400'} fa-heart text-lg"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
 
         function globalSearch() {
